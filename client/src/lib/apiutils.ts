@@ -18,3 +18,16 @@ export const getPredictions = (description: string) => {
       return {}
     })
 }
+
+export const getTestPredictions = () => {
+  return fetch('/test')
+    .then((res) => res.json())
+    .then((data) => {
+      return data
+    })
+    .catch((error) => {
+      // TODO create toasts on error
+      console.log('Error: Could not reach What Bird servers')
+      return {}
+    })
+}
