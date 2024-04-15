@@ -1,11 +1,51 @@
 from flask import Flask, request
 from openai_utils import get_gpt_predictions
+import pandas as pd
 
 
 app = Flask(__name__)
 
+PATH_TO_EBIRD_DATA = ""
+EBIRD_DATA_FILENAME = "eBird-Clements-v2023-integrated-checklist-October-2023.csv"
+ebird_data = pd.read_csv(PATH_TO_EBIRD_DATA + EBIRD_DATA_FILENAME, low_memory=False)
+mask = ebird_data["English name"].str.contains("KingFisher", case=False, na=False)
+filtered_ebird_data = ebird_data[mask]
+print(len(filtered_ebird_data))
 
-@app.route("/desc", methods=["POST"])
+
+@app.route("/tax", methods=["POST"])
+def get_bird_taxonomy():
+    """Returns bird taxonomy as JSON
+
+    Parameters:
+    bird (str): The English name of a bird
+
+    Returns:
+    JSON: The taxonomic information of the bird, including ['English name', 'scientific name', 'species_code', 'category', 'order', 'family', 'range', 'extinct', 'extinct year']
+    """
+    data = request.get_json()
+    name = data["name"]
+
+    properties = [
+        "English name",
+        "scientific name",
+        "species_code",
+        "category",
+        "order",
+        "family",
+        "range",
+        "extinct",
+        "extinct year",
+    ]
+    mask = ebird_data["English name"].str.contains(name, case=False, na=False)
+    try:
+        bird = ebird_data[mask].iloc[0][properties].to_json()
+        return bird
+    except:
+        return ""
+
+
+@app.route("/pred", methods=["POST"])
 def from_bird_desc():
     # Returns a GptPredictions type from a description input
     data = request.get_json()
@@ -15,7 +55,7 @@ def from_bird_desc():
     return gpt_predictions
 
 
-@app.route("/test", methods=["GET"])
+@app.route("/test-pred", methods=["GET"])
 def test_predictions():
     # Returns a GptPredictions type as test info
     output = """{

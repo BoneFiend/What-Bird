@@ -3,16 +3,34 @@ import { RadioGroup, Radio, Chip } from '@nextui-org/react'
 
 type Props = {
   birds?: Bird[]
+  setSelectedBird: Function
+  handleGetTaxonomy: Function
 }
 
-export const PredictedTile = ({ birds = defaultBirds }: Props) => {
+export const PredictedTile = ({
+  birds = defaultBirds,
+  setSelectedBird,
+  handleGetTaxonomy,
+}: Props) => {
+  const handleChange = (event: any) => {
+    setSelectedBird(event.target.value)
+    handleGetTaxonomy(event.target.value)
+  }
+
   return (
     // TODO add a button for "looks similar"
-    <div className="overflow-x-hidden pr-2">
+    <div className="mb-2 overflow-x-hidden pr-2">
       {birds && (
-        <RadioGroup className="flex flex-wrap" orientation="horizontal">
+        <RadioGroup
+          className="flex flex-wrap"
+          onChange={handleChange}
+          orientation="horizontal"
+        >
           {birds.map((b: Bird, i: any) => (
             <Radio
+              // TODO add hover: colour and selected colour
+              // TODO if small screen w-full
+              // TODO redo this sizing and classnames
               key={i}
               value={i}
               size="lg"

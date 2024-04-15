@@ -1,4 +1,4 @@
-export const getPredictions = (description: string) => {
+export const fetchPredictions = (description: string) => {
   const requestOptions = {
     method: 'POST',
     headers: {
@@ -7,7 +7,7 @@ export const getPredictions = (description: string) => {
     body: JSON.stringify({ desc: description }),
   }
 
-  return fetch('/desc', requestOptions)
+  return fetch('/pred', requestOptions)
     .then((res) => res.json())
     .then((data) => {
       return data
@@ -19,8 +19,8 @@ export const getPredictions = (description: string) => {
     })
 }
 
-export const getTestPredictions = () => {
-  return fetch('/test')
+export const fetchTestPredictions = () => {
+  return fetch('/test-pred')
     .then((res) => res.json())
     .then((data) => {
       return data
@@ -28,6 +28,29 @@ export const getTestPredictions = () => {
     .catch((error) => {
       // TODO create toasts on error
       console.log('Error: Could not reach What Bird servers')
+      return {}
+    })
+}
+
+export const fetchTaxonomy = (name: string) => {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name: name }),
+  }
+
+  return fetch('/tax', requestOptions)
+    .then((res) => res.json())
+    .then((data) => {
+      return data
+    })
+    .catch((error) => {
+      // TODO create toasts on error
+      console.log(
+        `Error: Could not get Taxonomic information for '${name}' from What Bird servers`
+      )
       return {}
     })
 }

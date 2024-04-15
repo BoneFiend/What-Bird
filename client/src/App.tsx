@@ -3,23 +3,42 @@ import { Accordion, AccordionItem } from '@nextui-org/react'
 import { InputTile } from './components/cards/InputTile'
 import { DescriptionTile } from './components/cards/DescriptionTile'
 import { PredictedTile } from './components/cards/PredictedTile'
-import { getPredictions, getTestPredictions } from './lib/apiutils'
-import { GptPredictions } from './lib/birds'
+import {
+  fetchPredictions,
+  fetchTestPredictions,
+  fetchTaxonomy,
+} from './lib/apiutils'
+import { GptPredictions, updateBirdTaxonomy, defaultBird } from './lib/birds'
 
 function App() {
   const debuggingMode = false
-  // const [selectedBird, setSelectedBird] = useState<Bird>({})
+
+  const [selectedBird, setSelectedBird] = useState(-1)
   const [description, setDescription] = useState('')
-  const [gptPredictions, setGptPredictions] = useState<GptPredictions>({})
+  const [gptPredictions, setGptPredictions] = useState<GptPredictions>({
+    birds: [],
+  })
 
   const handleSearch = async (description: string) => {
+    // Gets predictions from GPT and puts saves them to gptPredictions
     if (debuggingMode) {
-      getTestPredictions().then((data) => {
+      fetchTestPredictions().then((data) => {
         setGptPredictions(data)
       })
     } else {
-      getPredictions(description).then((data) => {
+      fetchPredictions(description).then((data) => {
         setGptPredictions(data)
+      })
+    }
+  }
+
+  const handleGetTaxonomy = async (i: number) => {
+    // Fetches the taxonomic data the updates the bird's taxonomy
+    // TODO this sometimes can't find the right bird. perhaps a better prompt
+    // or another json property would help
+    if (!gptPredictions.birds[i].tax) {
+      fetchTaxonomy(gptPredictions.birds[i].name).then((taxonomy) => {
+        setGptPredictions(updateBirdTaxonomy(gptPredictions, i, taxonomy))
       })
     }
   }
@@ -31,7 +50,8 @@ function App() {
   }
 
   return (
-    <div className="mx-auto mt-16 flex max-w-3xl flex-col items-center justify-center transition-all">
+    // TODO redo sizing
+    <div className="mx-auto mt-16 flex h-1/2 max-w-5xl flex-col items-center justify-center transition-all">
       <Accordion
         variant="splitted"
         selectionMode="multiple"
@@ -51,11 +71,19 @@ function App() {
           />
         </AccordionItem>
         <AccordionItem key="2" aria-label="Accordion 2" title="Predicted">
-          <PredictedTile birds={gptPredictions.birds} />
+          <PredictedTile
+            birds={gptPredictions.birds}
+            setSelectedBird={setSelectedBird}
+            handleGetTaxonomy={handleGetTaxonomy}
+          />
         </AccordionItem>
-        <AccordionItem key="3" aria-label="Accordion 3" title="Selected Bird">
-          <DescriptionTile // name={selectedBird.name}
-            desc={gptPredictions.summary}
+        <AccordionItem
+          key="3"
+          aria-label="Accordion 3"
+          title={gptPredictions.birds[selectedBird]?.name ?? 'Select a bird'}
+        >
+          <DescriptionTile
+            bird={gptPredictions.birds[selectedBird] ?? defaultBird}
           />
         </AccordionItem>
       </Accordion>
