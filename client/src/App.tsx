@@ -15,19 +15,26 @@ function App() {
 
   const [selectedBird, setSelectedBird] = useState(-1)
   const [description, setDescription] = useState('')
+  const [lastDescription, setLastDescription] = useState('')
   const [gptPredictions, setGptPredictions] = useState<GptPredictions>({
     birds: [],
   })
 
+  const [gptLoading, setGptLoading] = useState(false)
+
   const handleSearch = async (description: string) => {
     // Gets predictions from GPT and puts saves them to gptPredictions
+    setGptLoading(true)
+    setLastDescription(description)
     if (debuggingMode) {
       fetchTestPredictions().then((data) => {
         setGptPredictions(data)
+        setGptLoading(false)
       })
     } else {
       fetchPredictions(description).then((data) => {
         setGptPredictions(data)
+        setGptLoading(false)
       })
     }
   }
@@ -67,14 +74,17 @@ function App() {
           <InputTile
             description={description}
             setDescription={setDescription}
+            lastDescription={lastDescription}
             handleSearch={handleSearch}
+            isLoading={gptLoading}
           />
         </AccordionItem>
-        <AccordionItem key="2" aria-label="Accordion 2" title="Predicted">
+        <AccordionItem key="2" aria-label="Accordion 2" title="Predictions">
           <PredictedTile
             birds={gptPredictions.birds}
             setSelectedBird={setSelectedBird}
             handleGetTaxonomy={handleGetTaxonomy}
+            isLoading={gptLoading}
           />
         </AccordionItem>
         <AccordionItem
