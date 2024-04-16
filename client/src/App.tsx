@@ -3,6 +3,8 @@ import { Accordion, AccordionItem } from '@nextui-org/react'
 import { InputTile } from './components/cards/InputTile'
 import { DescriptionTile } from './components/cards/DescriptionTile'
 import { PredictedTile } from './components/cards/PredictedTile'
+import { Navbar } from './components/navbar/Navbar'
+import { InfoModal } from './components/modals/InfoModal'
 import {
   fetchPredictions,
   fetchTestPredictions,
@@ -19,8 +21,8 @@ function App() {
   const [gptPredictions, setGptPredictions] = useState<GptPredictions>({
     birds: [],
   })
-
   const [gptLoading, setGptLoading] = useState(false)
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false)
 
   const handleSearch = async (description: string) => {
     // Gets predictions from GPT and puts saves them to gptPredictions
@@ -58,45 +60,54 @@ function App() {
 
   return (
     // TODO redo sizing
-    <div className="mx-auto mt-16 flex h-1/2 max-w-5xl flex-col items-center justify-center transition-all">
-      <Accordion
-        variant="splitted"
-        selectionMode="multiple"
-        className="py-4"
-        itemClasses={accordianItemClasses}
-        defaultExpandedKeys={['1', '2']}
-      >
-        <AccordionItem
-          key="1"
-          aria-label="Accordion 1"
-          title="Describe the Bird"
+    <div className="mx-auto flex h-1/2 max-w-5xl flex-col">
+      <Navbar setIsInfoModalOpen={setIsInfoModalOpen} />
+      <div className="flex flex-col items-center justify-center transition-all">
+        <Accordion
+          variant="splitted"
+          selectionMode="multiple"
+          className="pb-4"
+          itemClasses={accordianItemClasses}
+          defaultExpandedKeys={['1', '2']}
         >
-          <InputTile
-            description={description}
-            setDescription={setDescription}
-            lastDescription={lastDescription}
-            handleSearch={handleSearch}
-            isLoading={gptLoading}
-          />
-        </AccordionItem>
-        <AccordionItem key="2" aria-label="Accordion 2" title="Predictions">
-          <PredictedTile
-            birds={gptPredictions.birds}
-            setSelectedBird={setSelectedBird}
-            handleGetTaxonomy={handleGetTaxonomy}
-            isLoading={gptLoading}
-          />
-        </AccordionItem>
-        <AccordionItem
-          key="3"
-          aria-label="Accordion 3"
-          title={gptPredictions.birds[selectedBird]?.name ?? 'Select a bird'}
-        >
-          <DescriptionTile
-            bird={gptPredictions.birds[selectedBird] ?? defaultBird}
-          />
-        </AccordionItem>
-      </Accordion>
+          <AccordionItem
+            key="1"
+            aria-label="Accordion 1"
+            title="Describe the Bird"
+          >
+            <InputTile
+              description={description}
+              setDescription={setDescription}
+              lastDescription={lastDescription}
+              handleSearch={handleSearch}
+              isLoading={gptLoading}
+            />
+          </AccordionItem>
+          <AccordionItem key="2" aria-label="Accordion 2" title="Predictions">
+            <PredictedTile
+              birds={gptPredictions.birds}
+              setSelectedBird={setSelectedBird}
+              handleGetTaxonomy={handleGetTaxonomy}
+              isLoading={gptLoading}
+            />
+          </AccordionItem>
+          <AccordionItem
+            key="3"
+            aria-label="Accordion 3"
+            title={gptPredictions.birds[selectedBird]?.name ?? 'Select a bird'}
+          >
+            <DescriptionTile
+              bird={gptPredictions.birds[selectedBird] ?? defaultBird}
+            />
+          </AccordionItem>
+        </Accordion>
+      </div>
+      <InfoModal
+        isOpen={isInfoModalOpen}
+        handleClose={() => {
+          setIsInfoModalOpen(false)
+        }}
+      />
     </div>
   )
 }
