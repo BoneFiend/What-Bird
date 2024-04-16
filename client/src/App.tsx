@@ -57,7 +57,7 @@ function App() {
         selectionMode="multiple"
         className="py-4"
         itemClasses={accordianItemClasses}
-        defaultExpandedKeys={['1', '2', '3']}
+        defaultExpandedKeys={['1', '2']}
       >
         <AccordionItem
           key="1"

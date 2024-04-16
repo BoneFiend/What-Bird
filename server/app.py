@@ -1,6 +1,13 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
+import urllib.parse
+import urllib.request
 from openai_utils import get_gpt_predictions
 import pandas as pd
+from dotenv import load_dotenv
+import os
+import json
+
+FLIKR_API_KEY = os.getenv("FLIKR_API_KEY")
 
 
 app = Flask(__name__)
@@ -10,7 +17,6 @@ EBIRD_DATA_FILENAME = "eBird-Clements-v2023-integrated-checklist-October-2023.cs
 ebird_data = pd.read_csv(PATH_TO_EBIRD_DATA + EBIRD_DATA_FILENAME, low_memory=False)
 mask = ebird_data["English name"].str.contains("KingFisher", case=False, na=False)
 filtered_ebird_data = ebird_data[mask]
-print(len(filtered_ebird_data))
 
 
 @app.route("/tax", methods=["POST"])
@@ -81,6 +87,50 @@ def test_predictions():
             }
             """
     return output
+
+
+@app.route("/pics", methods=["POST"])
+def get_photos():
+    """Returns bird taxonomy as JSON
+    # TODO rewrite this
+        Parameters:
+        bird (str): The English name of a bird
+
+        Returns:
+        JSON: The taxonomic information of the bird, including ['English name', 'scientific name', 'species_code', 'category', 'order', 'family', 'range', 'extinct', 'extinct year']
+    """
+    data = request.get_json()
+    name = data["name"]
+    sciname = data["sciname"]
+    n = data["n"]
+
+    print(name)
+    params = urllib.parse.urlencode(
+        {
+            "method": "flickr.photos.search",
+            "api_key": FLIKR_API_KEY,
+            "tags": sciname + ", " + name,
+            "format": "json",
+            "nojsoncallback": 1,
+            "per_page": n,
+            "media": "photos",
+            "sort": "interestingness-asc",
+            "safe_serach": 1,
+        }
+    )
+    url = f"https://www.flickr.com/services/rest/?{params}"
+
+    with urllib.request.urlopen(url) as response:
+        data = json.loads(response.read().decode())
+        photos = [
+            {
+                "src": f"https://live.staticflickr.com/{photo['server']}/{photo['id']}_{photo['secret']}.jpg",
+                "title": photo["title"],
+            }
+            for photo in data.get("photos", {}).get("photo", [])
+        ]
+
+    return jsonify(photos)
 
 
 if __name__ == "__main__":

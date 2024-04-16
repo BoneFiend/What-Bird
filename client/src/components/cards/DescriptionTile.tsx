@@ -1,5 +1,6 @@
 import { Bird } from '../../lib/birds'
 import { Breadcrumbs, BreadcrumbItem } from '@nextui-org/react'
+import { PhotoGallery } from '../photos/PhotoGallery'
 
 type Props = {
   bird: Bird
@@ -29,7 +30,7 @@ export const DescriptionTile = ({ bird }: Props) => {
 
           {bird.tax?.range && <div className="mt-2">{bird.tax?.range}</div>}
 
-          <div className="text-medium mt-2 flex justify-end pr-2 italic text-gray-500">
+          <div className="mt-2 flex justify-end pr-2 text-medium italic text-gray-500">
             Taxonomic information from&nbsp;
             <a href="https://ebird.org" target="_blank" rel="noreferrer">
               eBird.org
@@ -40,6 +41,13 @@ export const DescriptionTile = ({ bird }: Props) => {
       {!bird.tax?.['scientific name'] && (
         <>Could not find taxonomic data for {bird.name}.</>
       )}
+      <PhotoGallery bird={bird} />
+      <div className="mt-2 flex justify-end pr-2 text-medium italic text-gray-500">
+        Photos from&nbsp;
+        <a href="https://www.flickr.com/" target="_blank" rel="noreferrer">
+          flikr.com
+        </a>
+      </div>
     </div>
   )
 }
