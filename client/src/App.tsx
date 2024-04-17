@@ -24,9 +24,47 @@ function App() {
   const [gptLoading, setGptLoading] = useState(false)
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false)
 
+  const [selectedKeys, setSelectedKeys] = useState<string[]>(['1'])
+
+  const addSelectedKey = (key: string) => {
+    setSelectedKeys((prevKeys) => {
+      if (!prevKeys.includes(key)) {
+        return [...prevKeys, key]
+      }
+      return prevKeys
+    })
+  }
+
+  const toggleSelectedKey = (key: string) => {
+    setSelectedKeys((prevKeys) => {
+      if (prevKeys.includes(key)) {
+        return prevKeys.filter((k) => k !== key)
+      } else {
+        return [...prevKeys, key]
+      }
+    })
+  }
+
+  const removeSelectedKey = (key: string) => {
+    setSelectedKeys((prevKeys) => {
+      if (prevKeys.includes(key)) {
+        return prevKeys.filter((k) => k !== key)
+      } else {
+        return [...prevKeys]
+      }
+    })
+  }
+
+  const handleSelectBird = (key: number) => {
+    setSelectedBird(key)
+    addSelectedKey(`3`)
+  }
+
   const handleSearch = async (description: string) => {
     // Gets predictions from GPT and puts saves them to gptPredictions
     setGptLoading(true)
+    addSelectedKey('2')
+    removeSelectedKey('3')
     setLastDescription(description)
     if (debuggingMode) {
       fetchTestPredictions().then((data) => {
@@ -56,6 +94,7 @@ function App() {
     base: '!bg-slate-300',
     title: 'text-3xl font-bold',
     content: 'text-lg',
+    indicator: 'text-black',
   }
 
   return (
@@ -66,14 +105,16 @@ function App() {
         <Accordion
           variant="splitted"
           selectionMode="multiple"
+          selectedKeys={selectedKeys}
           className="pb-4"
           itemClasses={accordianItemClasses}
-          defaultExpandedKeys={['1', '2']}
+          defaultExpandedKeys={['1']}
         >
           <AccordionItem
             key="1"
             aria-label="Accordion 1"
             title="Describe the Bird"
+            onPress={() => toggleSelectedKey('1')}
           >
             <InputTile
               description={description}
@@ -84,11 +125,16 @@ function App() {
               information={gptPredictions.information ?? []}
             />
           </AccordionItem>
-          <AccordionItem key="2" aria-label="Accordion 2" title="Predictions">
+          <AccordionItem
+            key="2"
+            aria-label="Accordion 2"
+            title="Predictions"
+            onPress={() => toggleSelectedKey('2')}
+          >
             <PredictedTile
               birds={gptPredictions.birds}
               summary={gptPredictions.summary}
-              setSelectedBird={setSelectedBird}
+              setSelectedBird={handleSelectBird}
               handleGetTaxonomy={handleGetTaxonomy}
               isLoading={gptLoading}
             />
@@ -97,6 +143,7 @@ function App() {
             key="3"
             aria-label="Accordion 3"
             title={gptPredictions.birds[selectedBird]?.name ?? 'Select a bird'}
+            onPress={() => toggleSelectedKey('3')}
           >
             <DescriptionTile
               bird={gptPredictions.birds[selectedBird] ?? defaultBird}
