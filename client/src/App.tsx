@@ -81,11 +81,13 @@ function App() {
               lastDescription={lastDescription}
               handleSearch={handleSearch}
               isLoading={gptLoading}
+              information={gptPredictions.information ?? []}
             />
           </AccordionItem>
           <AccordionItem key="2" aria-label="Accordion 2" title="Predictions">
             <PredictedTile
               birds={gptPredictions.birds}
+              summary={gptPredictions.summary}
               setSelectedBird={setSelectedBird}
               handleGetTaxonomy={handleGetTaxonomy}
               isLoading={gptLoading}

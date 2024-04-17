@@ -4,6 +4,7 @@ import loadingBird from '../../assets/LOADING-BIRD-CROPPED.gif'
 
 type Props = {
   birds?: Bird[]
+  summary?: string
   setSelectedBird: Function
   handleGetTaxonomy: Function
   isLoading?: boolean
@@ -11,6 +12,7 @@ type Props = {
 
 export const PredictedTile = ({
   birds = defaultBirds,
+  summary,
   setSelectedBird,
   handleGetTaxonomy,
   isLoading = false,
@@ -25,10 +27,11 @@ export const PredictedTile = ({
     // TODO add summary here
     <>
       {!isLoading && (
-        <div className="mb-2 overflow-x-hidden pr-2">
+        <div className="mb-1 overflow-x-hidden pr-2">
+          {summary && <div>{summary}</div>}
           {birds && (
             <RadioGroup
-              className="flex flex-wrap"
+              className="mt-3 flex flex-wrap"
               onChange={handleChange}
               orientation="horizontal"
             >
